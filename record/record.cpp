@@ -1,5 +1,5 @@
 #include <iostream>
-int main(int argc, char* argv[]) {
+    int main(int argc, char* argv[]) {
     std::string stream, out, time;
 
     for (int i = 1; i < argc; i++) {
@@ -7,27 +7,19 @@ int main(int argc, char* argv[]) {
 
         if (arg == "-stream") {
             if (i + 1 < argc) stream = argv[++i];
-            else {
-                std::cerr << "Missing value for -stream\n";
-                return 1;
-            }
-        }
+            else { std::cerr << "Missing value for -stream\n"; return 1; }
+        } 
         else if (arg == "-out") {
             if (i + 1 < argc) out = argv[++i];
-            else {
-                std::cerr << "Missing value for -out\n";
-                return 1;
-            }
-        }
-        if (arg == "-time") {
+            else { std::cerr << "Missing value for -out\n"; return 1; }
+        } 
+        else if (arg == "-time") { // Changed 'if' to 'else if'
             if (i + 1 < argc) time = argv[++i];
-            else {
-                std::cerr << "Missing value for -time\n";
-                return 1;
-            }
-        }
+            else { std::cerr << "Missing value for -time\n"; return 1; }
+        } 
         else {
             std::cerr << "Unknown argument: " << arg << "\n";
+            return 1; // Good practice to exit on unknown args
         }
     }
 
