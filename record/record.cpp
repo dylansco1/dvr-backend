@@ -13,13 +13,13 @@
             if (i + 1 < argc) out = argv[++i];
             else { std::cerr << "Missing value for -out\n"; return 1; }
         } 
-        else if (arg == "-time") { // Changed 'if' to 'else if'
+        else if (arg == "-time") {
             if (i + 1 < argc) time = argv[++i];
             else { std::cerr << "Missing value for -time\n"; return 1; }
         } 
         else {
             std::cerr << "Unknown argument: " << arg << "\n";
-            return 1; // Good practice to exit on unknown args
+            return 1;
         }
     }
 
