@@ -31,7 +31,6 @@
     std::cout << "stream = " << stream << "\n";
     std::cout << "out = " << out << "\n";
     std::cout << "time = " << time << "\n";
-
-    int rec = system(("ffmpeg -i " + stream + " -c copy " + "-t " + time + " " + out).c_str());
+    int rec = system(("ffmpeg -i '" + stream + "' -c copy -t " + time + " '" + out + "'").c_str());
 }
 
