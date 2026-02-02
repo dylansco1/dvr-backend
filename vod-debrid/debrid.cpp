@@ -27,7 +27,7 @@
 
 
     int main(int argc, char* argv[]) {
-    std::string query, dl, prapikey, tbapikey, tv, episode;
+    std::string query, prapikey, tbapikey, tv, episode;
 
     for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
@@ -44,10 +44,6 @@
             if (i + 1 < argc) tbapikey = argv[++i];
             else { std::cerr << "Missing value for -tbapikey\n"; return 1; }
         }
-        else if (arg == "-dl") {
-            if (i + 1 < argc) dl = argv[++i];
-            else { std::cerr << "Missing value for -dl\n"; return 1; }
-        }
         else if (arg == "-tv") {
             if (i + 1 < argc) tv = argv[++i];
             else { std::cerr << "Missing value for -tv\n"; return 1; }
@@ -62,16 +58,15 @@
         }
     }
 
-    if (query.empty() || prapikey.empty() || tbapikey.empty() || dl.empty() || tv.empty()) { 
-        std::cerr << "Usage: debrid -query <QUERY> -tbapikey <TORBOX API KEY> -prapikey <PROWLARR API KEY> -dl <TRUE/FALSE> -tv <TRUE/FALSE> -episode (not required, has to look like S01E01)\n";
+    if (query.empty() || prapikey.empty() || tbapikey.empty() || tv.empty()) { 
+        std::cerr << "Usage: debrid -query <QUERY> -tbapikey <TORBOX API KEY> -prapikey <PROWLARR API KEY> -tv <TRUE/FALSE> -episode (not required, has to look like S01E01)\n";
         return 1;
     }
 
     std::cout << "query = " << query << "\n";
     std::cout << "prapikey = " << prapikey << "\n";
     std::cout << "tbapikey = " << tbapikey << "\n";
-    std::cout << "dl = " << dl << "\n";
-    std:: cout << "tv = " <<dl << "\n";
+    std:: cout << "tv = " << tv << "\n";
 
     std::string command;
 
@@ -242,5 +237,16 @@
     }
 
     std::cout << "Final media link: " << media_link << "\n";
+
+    std::ofstream file("output.txt");
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file\n";
+        return 1;
+    }
+
+    file << media_link;
+
+    file.close();
     return 0;
 }
