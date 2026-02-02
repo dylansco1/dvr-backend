@@ -9,9 +9,6 @@
 
 using namespace std;
 
-/**
-* Execute command and capture output
-*/
 string exec_command(const string& cmd) {
     array<char, 128> buffer;
     string result;
@@ -26,19 +23,14 @@ string exec_command(const string& cmd) {
     return result;
 }
 
-/**
-* Get m3u8 URL from iPlayer link using yt-dlp
-*/
 string get_m3u8_url(const string& iplayer_link) {
     if (iplayer_link.empty()) {
         return "";
     }
-    // Construct yt-dlp command to get m3u8 URL
     string cmd = "yt-dlp --get-url '" + iplayer_link + "' 2>/dev/null";
     cout << "  Fetching m3u8 URL for: " << iplayer_link << endl;
     string output = exec_command(cmd);
     
-    // Trim whitespace and newlines
     size_t start = output.find_first_not_of(" \t\n\r");
     size_t end = output.find_last_not_of(" \t\n\r");
     if (start == string::npos || end == string::npos) {
@@ -46,17 +38,12 @@ string get_m3u8_url(const string& iplayer_link) {
     }
     string m3u8_url = output.substr(start, end - start + 1);
     
-    // Check if it's a valid URL
     if (m3u8_url.find("http") == 0 && m3u8_url.find(".m3u8") != string::npos) {
         return m3u8_url;
     }
     return "";
 }
 
-/**
-* Simple JSON value extractor
-* Finds the value of a key in JSON string
-*/
 string extract_json_value(const string& json, const string& key) {
     string search = "\"" + key + "\":";
     size_t pos = json.find(search);
@@ -65,7 +52,6 @@ string extract_json_value(const string& json, const string& key) {
     }
     pos += search.length();
     
-    // Skip whitespace
     while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n')) {
         pos++;
     }
@@ -74,27 +60,24 @@ string extract_json_value(const string& json, const string& key) {
         return "";
     }
     
-    // Check if it's a string value
     if (json[pos] == '"') {
-        pos++; // Skip opening quote
+        pos++;
         size_t end = pos;
         while (end < json.length() && json[end] != '"') {
             if (json[end] == '\\') {
-                end++; // Skip escaped character
+                end++; 
             }
             end++;
         }
         return json.substr(pos, end - pos);
     }
     
-    // Otherwise, extract until comma, brace, or bracket
     size_t end = pos;
     while (end < json.length() && json[end] != ',' && json[end] != '}' && json[end] != ']') {
         end++;
     }
     string value = json.substr(pos, end - pos);
     
-    // Trim whitespace
     size_t first = value.find_first_not_of(" \t\n\r");
     size_t last = value.find_last_not_of(" \t\n\r");
     if (first == string::npos) {
@@ -103,9 +86,6 @@ string extract_json_value(const string& json, const string& key) {
     return value.substr(first, last - first + 1);
 }
 
-/**
-* Extract a JSON object by key
-*/
 string extract_json_object(const string& json, const string& key) {
     string search = "\"" + key + "\":";
     size_t pos = json.find(search);
@@ -114,7 +94,6 @@ string extract_json_object(const string& json, const string& key) {
     }
     pos += search.length();
     
-    // Skip whitespace
     while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n')) {
         pos++;
     }
@@ -123,7 +102,6 @@ string extract_json_object(const string& json, const string& key) {
         return "";
     }
     
-    // Find matching closing brace
     int brace_count = 0;
     size_t start = pos;
     while (pos < json.length()) {
@@ -135,7 +113,6 @@ string extract_json_object(const string& json, const string& key) {
                 return json.substr(start, pos - start + 1);
             }
         } else if (json[pos] == '"') {
-            // Skip quoted strings
             pos++;
             while (pos < json.length() && json[pos] != '"') {
                 if (json[pos] == '\\') {
@@ -149,9 +126,6 @@ string extract_json_object(const string& json, const string& key) {
     return "";
 }
 
-/**
-* Extract first element from JSON array
-*/
 string extract_first_array_element(const string& json, const string& key) {
     string search = "\"" + key + "\":";
     size_t pos = json.find(search);
@@ -160,7 +134,6 @@ string extract_first_array_element(const string& json, const string& key) {
     }
     pos += search.length();
     
-    // Skip whitespace
     while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n')) {
         pos++;
     }
@@ -168,9 +141,8 @@ string extract_first_array_element(const string& json, const string& key) {
     if (pos >= json.length() || json[pos] != '[') {
         return "";
     }
-    pos++; // Skip opening bracket
+    pos++;
     
-    // Skip whitespace
     while (pos < json.length() && (json[pos] == ' ' || json[pos] == '\t' || json[pos] == '\n')) {
         pos++;
     }
@@ -179,7 +151,6 @@ string extract_first_array_element(const string& json, const string& key) {
         return "";
     }
     
-    // Find matching closing brace
     int brace_count = 0;
     size_t start = pos;
     while (pos < json.length()) {
@@ -191,7 +162,6 @@ string extract_first_array_element(const string& json, const string& key) {
                 return json.substr(start, pos - start + 1);
             }
         } else if (json[pos] == '"') {
-            // Skip quoted strings
             pos++;
             while (pos < json.length() && json[pos] != '"') {
                 if (json[pos] == '\\') {
@@ -205,26 +175,19 @@ string extract_first_array_element(const string& json, const string& key) {
     return "";
 }
 
-/**
-* Convert ISO 8601 duration (PT28M11.960S) to human readable format
-*/
 string parse_duration(const string& iso_duration) {
     if (iso_duration.empty()) {
         return "";
     }
     
-    // Find 'M' for minutes
     size_t m_pos = iso_duration.find('M');
     if (m_pos != string::npos && m_pos > 2) {
-        string minutes_str = iso_duration.substr(2, m_pos - 2); // Skip "PT"
+        string minutes_str = iso_duration.substr(2, m_pos - 2);
         return minutes_str + " minutes";
     }
     return "";
 }
 
-/**
-* Extract remaining time from text like "Available for 27 days"
-*/
 string extract_remaining_time(const string& remaining_text) {
     if (remaining_text.empty()) {
         return "";
@@ -233,7 +196,6 @@ string extract_remaining_time(const string& remaining_text) {
     size_t for_pos = remaining_text.find("for");
     if (for_pos != string::npos) {
         string result = remaining_text.substr(for_pos + 3);
-        // Trim leading whitespace
         size_t start = result.find_first_not_of(" \t");
         if (start != string::npos) {
             return result.substr(start);
@@ -242,9 +204,6 @@ string extract_remaining_time(const string& remaining_text) {
     return remaining_text;
 }
 
-/**
-* Escape XML special characters
-*/
 string xml_escape(const string& text) {
     string result;
     result.reserve(text.length());
@@ -261,22 +220,16 @@ string xml_escape(const string& text) {
     return result;
 }
 
-/**
-* Convert a single episode JSON to XML string
-*/
 string convert_episode_to_xml(const string& episode_json, bool fetch_m3u8) {
     ostringstream xml;
     
-    // Extract version (first element of versions array)
     string version = extract_first_array_element(episode_json, "versions");
     
-    // Extract nested objects
     string availability = extract_json_object(version, "availability");
     string duration_obj = extract_json_object(version, "duration");
     string synopses = extract_json_object(episode_json, "synopses");
     string remaining_obj = extract_json_object(availability, "remaining");
     
-    // Extract values
     string subtitle = extract_json_value(episode_json, "subtitle");
     string title = extract_json_value(episode_json, "title");
     string desc = extract_json_value(synopses, "medium");
@@ -288,7 +241,6 @@ string convert_episode_to_xml(const string& episode_json, bool fetch_m3u8) {
     string remaining_text = extract_json_value(remaining_obj, "text");
     string episode_id = extract_json_value(episode_json, "id");
     
-    // Process values
     string duration = parse_duration(duration_value);
     string remaining = extract_remaining_time(remaining_text);
     string iplayer_link = "";
@@ -296,7 +248,6 @@ string convert_episode_to_xml(const string& episode_json, bool fetch_m3u8) {
         iplayer_link = "https://www.bbc.co.uk/programmes/" + episode_id;
     }
     
-    // Get m3u8 URL if requested
     string m3u8_url = "";
     if (fetch_m3u8 && !iplayer_link.empty()) {
         m3u8_url = get_m3u8_url(iplayer_link);
@@ -305,8 +256,6 @@ string convert_episode_to_xml(const string& episode_json, bool fetch_m3u8) {
         }
     }
     
-    // Build XML
-    xml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
     xml << "<nvsc>\n";
     xml << "\t<moviename></moviename>\n";
     xml << "\t<episode>" << xml_escape(subtitle) << "</episode>\n";
@@ -322,13 +271,9 @@ string convert_episode_to_xml(const string& episode_json, bool fetch_m3u8) {
     return xml.str();
 }
 
-/**
-* Extract all episodes from the JSON
-*/
 vector<string> extract_episodes(const string& json_content) {
     vector<string> episodes;
     
-    // Find the elements array
     string search = "\"elements\":";
     size_t pos = json_content.find(search);
     if (pos == string::npos) {
@@ -336,15 +281,12 @@ vector<string> extract_episodes(const string& json_content) {
     }
     pos += search.length();
     
-    // Skip whitespace and opening bracket
     while (pos < json_content.length() && json_content[pos] != '[') {
         pos++;
     }
-    pos++; // Skip '['
+    pos++; 
     
-    // Extract each episode object
     while (pos < json_content.length()) {
-        // Skip whitespace
         while (pos < json_content.length() && 
                (json_content[pos] == ' ' || json_content[pos] == '\t' || 
                 json_content[pos] == '\n' || json_content[pos] == '\r')) {
@@ -356,7 +298,6 @@ vector<string> extract_episodes(const string& json_content) {
         }
         
         if (json_content[pos] == '{') {
-            // Find matching closing brace
             int brace_count = 0;
             size_t start = pos;
             while (pos < json_content.length()) {
@@ -370,7 +311,6 @@ vector<string> extract_episodes(const string& json_content) {
                         break;
                     }
                 } else if (json_content[pos] == '"') {
-                    // Skip quoted strings
                     pos++;
                     while (pos < json_content.length() && json_content[pos] != '"') {
                         if (json_content[pos] == '\\') {
@@ -383,7 +323,6 @@ vector<string> extract_episodes(const string& json_content) {
             }
         }
         
-        // Skip comma
         if (pos < json_content.length() && json_content[pos] == ',') {
             pos++;
         }
@@ -392,11 +331,7 @@ vector<string> extract_episodes(const string& json_content) {
     return episodes;
 }
 
-/**
-* Convert JSON file to XML files
-*/
 void convert_json_to_xml(const string& json_file, const string& output_file = "", bool fetch_m3u8 = false) {
-    // Read JSON file
     ifstream file(json_file);
     if (!file.is_open()) {
         cerr << "Error: Could not open file " << json_file << endl;
@@ -408,7 +343,6 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
     string json_content = buffer.str();
     file.close();
 
-    // Extract episodes
     vector<string> episodes = extract_episodes(json_content);
 
     if (episodes.empty()) {
@@ -424,7 +358,6 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
 
     cout << endl;
 
-    // Determine output directory if -o was specified
     string output_dir = "";
     if (!output_file.empty() && episodes.size() > 1) {
         size_t slash_pos = output_file.find_last_of("/\\");
@@ -433,26 +366,20 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
         }
     }
 
-    // Convert each episode
     for (size_t i = 0; i < episodes.size(); i++) {
         cout << "Processing episode " << (i + 1) << "/" << episodes.size() << "..." << endl;
 
         string xml_string = convert_episode_to_xml(episodes[i], fetch_m3u8);
 
-        // Determine output filename
         string filename;
         
         if (!output_file.empty() && episodes.size() == 1) {
-            // Single episode with -o specified: use exact filename
             filename = output_file;
         } else {
-            // Multiple episodes OR no -o specified: use programme/episode naming
             
-            // Extract series name and episode for filename
             string series_name = extract_json_value(episodes[i], "title");
             string episode_name = extract_json_value(episodes[i], "subtitle");
 
-            // Clean series name for filename
             string safe_series = series_name;
             for (char& c : safe_series) {
                 if (c == ' ') c = '_';
@@ -462,7 +389,6 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
                 }
             }
 
-            // Clean episode name for filename
             string safe_episode = episode_name;
             for (char& c : safe_episode) {
                 if (c == ' ') c = '_';
@@ -472,7 +398,6 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
                 }
             }
 
-            // Determine base directory
             string base_dir;
             if (!output_dir.empty()) {
                 base_dir = output_dir;
@@ -480,22 +405,19 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
                 base_dir = "/mnt/catchup-tv/iplayer/";
             }
 
-            // Create filename from series and episode
             if (!safe_series.empty() && !safe_episode.empty()) {
-                filename = base_dir + safe_series + "_" + safe_episode + ".xml";
+                filename = base_dir + safe_series + "_" + safe_episode + ".nvsc";
             } else if (!safe_series.empty()) {
-                filename = base_dir + safe_series + "_" + to_string(i + 1) + ".xml";
+                filename = base_dir + safe_series + "_" + to_string(i + 1) + ".nvsc";
             } else {
-                // Fallback to episode ID
                 string episode_id = extract_json_value(episodes[i], "id");
                 if (episode_id.empty()) {
                     episode_id = "episode_" + to_string(i + 1);
                 }
-                filename = base_dir + episode_id + ".xml";
+                filename = base_dir + episode_id + ".nvsc";
             }
         }
 
-        // Write to file
         ofstream out(filename);
         if (!out.is_open()) {
             cerr << "Error: Could not create output file " << filename << endl;
@@ -537,11 +459,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // json_file meaning url
     string json_file = "";
     string output_file = "";
     bool fetch_m3u8 = false;
 
-    // Parse arguments
     for (int i = 1; i < argc; i++) {
         string arg = argv[i];
         if (arg == "-h" || arg == "--help") {
@@ -571,7 +493,20 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    convert_json_to_xml(json_file, output_file, fetch_m3u8);
+    string cmd = "curl -s \"" + json_file + "\"";
+    string output = exec_command(cmd);
+
+    if (output.empty()) {
+        cerr << "Error: curl returned empty output" << endl;
+        return 1;
+    }
+
+    string temp_file = "/tmp/iplayer.json";
+    ofstream tmp(temp_file);
+    tmp << output;
+    tmp.close();
+
+    convert_json_to_xml(temp_file, output_file, fetch_m3u8);
 
     return 0;
 }

@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <cstdio> 
 #include <unistd.h>
+#include <ctime>
 #include <sys/wait.h>
 #include <string>
 #include <vector>
@@ -238,7 +239,10 @@
 
     std::cout << "Final media link: " << media_link << "\n";
 
-    std::ofstream file("output.txt");
+    std::time_t timestamp = std::time(nullptr);
+    std::cout << "Unix timestamp: " << timestamp << std::endl;
+
+    std::ofstream file("debrid" + std::to_string(timestamp) + ".txt");
 
     if (!file.is_open()) {
         std::cerr << "Failed to open file\n";
