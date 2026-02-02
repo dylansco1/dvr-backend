@@ -1,6 +1,6 @@
 // rewrote as old vod modules were dire
 // prowlarr is used here
-// add tpb indexer, use socks5 proxy
+// add knaben
 
 #include <iostream>
 #include <fstream>
