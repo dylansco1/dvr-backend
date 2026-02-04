@@ -402,7 +402,7 @@ void convert_json_to_xml(const string& json_file, const string& output_file = ""
             if (!output_dir.empty()) {
                 base_dir = output_dir;
             } else {
-                base_dir = "/mnt/catchup-tv/iplayer/";
+                base_dir = "/opt/catchup/iplayer/";
             }
 
             if (!safe_series.empty() && !safe_episode.empty()) {

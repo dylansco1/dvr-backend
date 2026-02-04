@@ -11,6 +11,9 @@
 #include <sys/wait.h>
 #include <string>
 #include <vector>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
     static std::string shellEscape(const std::string& s)
     {
@@ -242,8 +245,14 @@
     std::time_t timestamp = std::time(nullptr);
     std::cout << "Unix timestamp: " << timestamp << std::endl;
 
-    std::ofstream file("debrid" + std::to_string(timestamp) + ".txt");
+    fs::path dir = "/opt/debridtext";
+    fs::path filename = "debrid" + std::to_string(timestamp) + ".txt";
 
+    int extinguish = system("rm -rf /opt/debridtext");
+    int createnew = system("mkdir /opt/debridtext");
+
+    std::ofstream file(dir / filename);
+    
     if (!file.is_open()) {
         std::cerr << "Failed to open file\n";
         return 1;
