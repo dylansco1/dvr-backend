@@ -29,7 +29,6 @@ namespace fs = std::filesystem;
         return out;
     }
 
-
     int main(int argc, char* argv[]) {
     std::string query, prapikey, tbapikey, tv, episode;
 
